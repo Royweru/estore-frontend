@@ -23,7 +23,6 @@ export const GetCategories = async () => {
           const productsResponse = await fetch(
             `${SERVER_API_BASE_URL}/catalog/products?category_id=${category.id}&page_size=1&sort=newest`,
             {
-              cache: "force-cache",
               next: {
                 revalidate: 120,
               },

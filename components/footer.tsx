@@ -51,7 +51,7 @@ export const Footer = () => {
         <div className="mt-6 sm:mt-0">
           <ul className="flex items-center space-x-4">
             <li className="w-10 h-10 border rounded-full flex items-center justify-center">
-              <a href="javascript:void()">
+              <a href="#">
                 <svg className="svg-icon w-6 h-6 text-blue-400" viewBox="0 0 20 20">
                   <path
                     fill="none"
@@ -62,7 +62,7 @@ export const Footer = () => {
             </li>
 
             <li className="w-10 h-10 border rounded-full flex items-center justify-center">
-              <a href="javascript:void()">
+              <a href="#">
                 <svg className="svg-icon w-6 h-6 text-blue-700" viewBox="0 0 20 20">
                   <path
                     fill="none"
@@ -73,7 +73,7 @@ export const Footer = () => {
             </li>
 
             <li className="w-10 h-10 border rounded-full flex items-center justify-center">
-              <a href="javascript:void()">
+              <a href="#">
                 <svg className="svg-icon w-6 h-6 text-blue-500" viewBox="0 0 20 20">
                   <path
                     fill="none"
@@ -84,7 +84,7 @@ export const Footer = () => {
             </li>
 
             <li className="w-10 h-10 border rounded-full flex items-center justify-center">
-              <a href="javascript:void()">
+              <a href="#">
                 <svg className="svg-icon w-6 h-6 text-red-600" viewBox="0 0 20 20">
                   <path
                     fill="none"

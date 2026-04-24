@@ -4,7 +4,6 @@ import { mapApiSize } from '@/lib/mappers'
 export const GetSizes = async () => {
   try {
     const response = await fetch(`${SERVER_API_BASE_URL}/catalog/sizes`, {
-      cache: 'force-cache',
       next: {
         revalidate: 60,
       },

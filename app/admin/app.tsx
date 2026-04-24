@@ -11,6 +11,12 @@ import { SizeEdit } from './size/edit';
 import { ProductCreate } from './product/create';
 import { ProductList } from './product/list';
 import { ProductEdit } from './product/edit';
+import { OrderList } from './order/list';
+import { OrderShow } from './order/show';
+import { InventoryList } from './inventory/list';
+import { InventoryEdit } from './inventory/edit';
+import { ReviewList } from './review/list';
+import { ReviewEdit } from './review/edit';
 import { CLIENT_API_BASE_URL } from '@/lib/api';
 
 const httpClient = (url: string, options: fetchUtils.Options = {}) => {
@@ -43,7 +49,21 @@ export const App = () => {
        create={ProductCreate}
        edit={ProductEdit}
       />
-   
+     <Resource
+       name='orders'
+       list={OrderList}
+       show={OrderShow}
+      />
+     <Resource
+       name='inventory'
+       list={InventoryList}
+       edit={InventoryEdit}
+      />
+     <Resource
+       name='reviews'
+       list={ReviewList}
+       edit={ReviewEdit}
+      />
     </Admin>
   )
 }
