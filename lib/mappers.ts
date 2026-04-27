@@ -38,6 +38,11 @@ type ApiProduct = {
   category?: ApiCategory;
   size: ApiSize;
   images: ApiImage[];
+  inventory?: {
+    id: string;
+    quantity: number;
+  };
+  average_rating?: number;
 };
 
 type ApiUser = {

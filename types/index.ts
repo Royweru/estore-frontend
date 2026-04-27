@@ -34,6 +34,11 @@ export type Product = {
   createdAt?: string;
   isFeatured: boolean;
   isArchived: boolean;
+  inventory?: {
+    id: string;
+    quantity: number;
+  };
+  averageRating?: number;
 };
 
 export type UserSession = {

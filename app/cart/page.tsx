@@ -1,37 +1,47 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { useSession } from "@/components/providers/session-provider";
 import { useCart } from "@/hooks/use-cart";
 import { apiClient } from "@/lib/api";
 import { Check, XIcon } from "lucide-react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import React from "react";
 import { toast } from "sonner";
 
 const CartPage = () => {
-  
+  const router = useRouter();
+  const { user, isLoading } = useSession();
   const { items, removeItem } = useCart();
+  const [isCheckingOut, setIsCheckingOut] = React.useState(false);
 
   const totalPrice = items.reduce((accumulator, currentValue) => {
     return accumulator + currentValue.price;
   }, 0);
 
   const buyProduct = async () => {
+    if (!user) {
+      const redirectPath = encodeURIComponent("/cart");
+      router.push(`/sign-up?redirect=${redirectPath}&checkout=1`);
+      return;
+    }
+
+    setIsCheckingOut(true);
     try {
       const response = await apiClient.post('/checkout/initialize');
       const checkoutUrl = response?.data?.authorization_url;
       if (!checkoutUrl) {
         throw new Error('Missing checkout URL');
       }
-      
-      // Clear local cart since the server cart is cleared on initialization
-      useCart.setState({ items: [], serverCartItemIds: {} });
-      
+
       // Redirect to the payment gateway in the same tab
       window.location.href = checkoutUrl;
     } catch (error) {
       console.error(error);
-      toast.error("Something went wrong while proceeding to check out");
+      toast.error("Unable to start checkout. Please try again.");
+    } finally {
+      setIsCheckingOut(false);
     }
   };
 
@@ -129,8 +139,9 @@ const CartPage = () => {
                text-pallete-red"
                   variant="secondary"
                   onClick={buyProduct}
+                  disabled={isLoading || isCheckingOut}
                 >
-                  Proceed to checkout
+                  {isCheckingOut ? "Starting checkout..." : "Proceed to checkout"}
                 </Button>
               </div>
             </div>

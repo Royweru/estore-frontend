@@ -9,6 +9,36 @@ NEXT_PUBLIC_API_BASE_URL=http://localhost:8000/api/v1
 API_BASE_URL=http://localhost:8000/api/v1
 ```
 
+## API Contract Notes
+
+Frontend expects the backend base URL to include `/api/v1`.
+
+Core commerce routes used by the app:
+
+- `GET /cart`
+- `POST /cart/items`
+- `PATCH /cart/items/{item_id}`
+- `DELETE /cart/items/{item_id}`
+- `DELETE /cart`
+- `POST /checkout/initialize`
+- `GET /payments/{reference}`
+
+Auth routes:
+
+- `POST /auth/register`
+- `POST /auth/login`
+- `GET /auth/me`
+- `POST /auth/logout`
+
+## Guest Cart + Checkout Flow
+
+- Guests can add/remove items locally without signing in.
+- Checkout is auth-gated at click time.
+- Guests are redirected to `sign-up`/`sign-in` with a redirect back to `/cart`.
+- After returning from Paystack callback, `checkout/success` attempts to:
+  - sync local cart with server cart
+  - fetch payment status when `reference` or `trxref` is present in query params
+
 First, run the development server:
 
 ```bash

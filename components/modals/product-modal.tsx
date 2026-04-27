@@ -12,11 +12,13 @@ import Image from "next/image";
 import { ScrollArea } from "../ui/scroll-area";
 
 
+import { ProductReviews } from "../product-reviews";
+
 export const ProductModal = () => {
   const { isOpen, onClose, data } = useProductModal();
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className=" text-xl font-semibold text-black/75">
             {data?.name}
@@ -25,7 +27,7 @@ export const ProductModal = () => {
             {data?.description}
           </DialogDescription>
         </DialogHeader>
-        <ScrollArea className=" h-80">
+        <ScrollArea className=" h-[60vh]">
           <div className=" md:p-3 lg:p-4 flex flex-col gap-y-2 py-1.5">
 
             <div className=" grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-1 lg:gap-0.5">
@@ -67,9 +69,13 @@ export const ProductModal = () => {
                     Kes
                 </span>
                   <h4 className=" font-bold text-xl tracking-tight">
-                      {data?.price.toLocaleString('en')}
+                      {data?.price ? data.price.toLocaleString('en') : "N/A"}
                   </h4>
             </div>
+
+            {/* Product Reviews */}
+            {data && <ProductReviews productId={data.id} />}
+
           </div>
         </ScrollArea>
       </DialogContent>

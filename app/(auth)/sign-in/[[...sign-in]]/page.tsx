@@ -11,6 +11,8 @@ export default function SignInPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { setUser } = useSession();
+  const redirectPath = searchParams.get("redirect") || "/";
+  const checkoutIntent = searchParams.get("checkout") === "1";
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -26,7 +28,6 @@ export default function SignInPage() {
       const session = await loginWithPassword(email, password);
       setUser(session);
 
-      const redirectPath = searchParams.get("redirect") || "/";
       router.push(redirectPath);
       router.refresh();
     } catch {
@@ -42,7 +43,11 @@ export default function SignInPage() {
       className="w-full max-w-md rounded-lg border border-neutral-200 bg-white p-6 shadow-sm"
     >
       <h1 className="text-2xl font-bold text-pallete-orange">Sign In</h1>
-      <p className="mt-2 text-sm text-neutral-600">Welcome back to Everything Design Store.</p>
+      <p className="mt-2 text-sm text-neutral-600">
+        {checkoutIntent
+          ? "Sign in to continue to checkout."
+          : "Welcome back to Everything Design Store."}
+      </p>
 
       <div className="mt-6 space-y-4">
         <input
@@ -78,7 +83,14 @@ export default function SignInPage() {
         type="button"
         variant="link"
         className="mt-2 w-full text-pallete-orange"
-        onClick={() => router.push("/sign-up")}
+        onClick={() => {
+          const params = new URLSearchParams();
+          params.set("redirect", redirectPath);
+          if (checkoutIntent) {
+            params.set("checkout", "1");
+          }
+          router.push(`/sign-up?${params.toString()}`);
+        }}
       >
         Create an account
       </Button>

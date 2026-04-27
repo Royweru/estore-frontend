@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import { useSession } from "@/components/providers/session-provider";
 import { Button } from "@/components/ui/button";
@@ -9,7 +9,10 @@ import { registerWithPassword } from "@/lib/auth";
 
 export default function SignUpPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { setUser } = useSession();
+  const redirectPath = searchParams.get("redirect") || "/";
+  const checkoutIntent = searchParams.get("checkout") === "1";
 
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -25,7 +28,7 @@ export default function SignUpPage() {
     try {
       const session = await registerWithPassword(email, password, fullName);
       setUser(session);
-      router.push("/");
+      router.push(redirectPath);
       router.refresh();
     } catch {
       setError("Could not create account. Please check your inputs and try again.");
@@ -40,7 +43,11 @@ export default function SignUpPage() {
       className="w-full max-w-md rounded-lg border border-neutral-200 bg-white p-6 shadow-sm"
     >
       <h1 className="text-2xl font-bold text-pallete-orange">Sign Up</h1>
-      <p className="mt-2 text-sm text-neutral-600">Create your account to continue shopping.</p>
+      <p className="mt-2 text-sm text-neutral-600">
+        {checkoutIntent
+          ? "Create an account to continue to checkout."
+          : "Create your account to continue shopping."}
+      </p>
 
       <div className="mt-6 space-y-4">
         <input
@@ -83,7 +90,14 @@ export default function SignUpPage() {
         type="button"
         variant="link"
         className="mt-2 w-full text-pallete-orange"
-        onClick={() => router.push("/sign-in")}
+        onClick={() => {
+          const params = new URLSearchParams();
+          params.set("redirect", redirectPath);
+          if (checkoutIntent) {
+            params.set("checkout", "1");
+          }
+          router.push(`/sign-in?${params.toString()}`);
+        }}
       >
         I already have an account
       </Button>

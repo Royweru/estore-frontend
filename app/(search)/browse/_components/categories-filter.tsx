@@ -50,7 +50,7 @@ export const CategoriesFilter =({categories}:{
        px-1.5 font-semibold text-pallete-orange'
        onClick={toggle}
        >
-      <p className=' text-xl text-pallete-orange'>
+      <p className=' text-lg font-bold tracking-widest uppercase text-pallete-orange'>
         Categories
       </p>
         {on && <FaCaretUp className=' size-4 font-bold text-black'/>}
@@ -62,7 +62,7 @@ export const CategoriesFilter =({categories}:{
             {categories.map((category)=>(
                 <div
                 key={category.id}
-                 className=' font-semibold  text-sm text-black cursor-pointer font-mono'
+                 className=' text-sm text-foreground/80 hover:text-pallete-orange transition-colors cursor-pointer'
                  onClick={()=>onClick(category.id)}
                 >
                {category.name}
