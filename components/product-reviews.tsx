@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { apiClient } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { FaStar } from "react-icons/fa";
@@ -24,13 +24,7 @@ export const ProductReviews = ({ productId }: { productId: string }) => {
   const [comment, setComment] = useState("");
   const { user } = useSession();
 
-  useEffect(() => {
-    if (productId) {
-      fetchReviews();
-    }
-  }, [productId]);
-
-  const fetchReviews = async () => {
+  const fetchReviews = useCallback(async () => {
     try {
       setIsLoading(true);
       const res = await apiClient.get(`/catalog/products/${productId}/reviews`);
@@ -40,7 +34,13 @@ export const ProductReviews = ({ productId }: { productId: string }) => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [productId]);
+
+  useEffect(() => {
+    if (productId) {
+      void fetchReviews();
+    }
+  }, [fetchReviews, productId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -58,7 +58,7 @@ export const ProductReviews = ({ productId }: { productId: string }) => {
       toast.success("Review submitted successfully!");
       setComment("");
       setRating(5);
-      fetchReviews(); // Refresh the list
+      void fetchReviews(); // Refresh the list
     } catch (error) {
       const e = error as { response?: { data?: { detail?: string } } };
       const msg = e.response?.data?.detail || "Failed to submit review. Have you purchased this item?";

@@ -16,10 +16,9 @@ useEffect(()=>{
 
 if(!mounted) return null
   return (
-    <div className={cn(' w-full relative',
+    <div className={cn('w-full relative',
       isHidden && 'hidden'
     )}>
-       
        <MainNav /> 
     </div>
   )

@@ -41,6 +41,11 @@ export type Product = {
   averageRating?: number;
 };
 
+export type CartLine = {
+  product: Product;
+  quantity: number;
+};
+
 export type UserSession = {
   id: string;
   email: string;

@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { useSession } from "@/components/providers/session-provider";
 import { useCart } from "@/hooks/use-cart";
-import { apiClient } from "@/lib/api";
+import { initializeCheckout } from "@/lib/core-commerce-client";
 import { Check, XIcon } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -13,11 +13,11 @@ import { toast } from "sonner";
 const CartPage = () => {
   const router = useRouter();
   const { user, isLoading } = useSession();
-  const { items, removeItem } = useCart();
+  const { items, removeItem, incrementItem, decrementItem } = useCart();
   const [isCheckingOut, setIsCheckingOut] = React.useState(false);
 
   const totalPrice = items.reduce((accumulator, currentValue) => {
-    return accumulator + currentValue.price;
+    return accumulator + (currentValue.product.price * currentValue.quantity);
   }, 0);
 
   const buyProduct = async () => {
@@ -29,10 +29,10 @@ const CartPage = () => {
 
     setIsCheckingOut(true);
     try {
-      const response = await apiClient.post('/checkout/initialize');
-      const checkoutUrl = response?.data?.authorization_url;
+      const response = await initializeCheckout();
+      const checkoutUrl = response.authorization_url;
       if (!checkoutUrl) {
-        throw new Error('Missing checkout URL');
+        throw new Error("Missing checkout URL");
       }
 
       // Redirect to the payment gateway in the same tab
@@ -54,9 +54,9 @@ const CartPage = () => {
             <h1 className="text-3xl font-bold text-pallete-orange">
               Your Cart
             </h1>
-            {items.map((item, index) => (
+            {items.map((item) => (
               <div
-                key={index}
+                key={item.product.id}
                 className="bg-white shadow-small rounded-lg p-1.5 h-[150px] lg:h-[200px] relative w-full 
               shadow hover:shadow-xl flex items-center transition-shadow duration-300 cursor-pointer gap-x-4"
               >
@@ -64,8 +64,8 @@ const CartPage = () => {
                   <Image
                     fill
                     className=" bg-center bg-contain"
-                    alt=""
-                    src={item.images[0].url}
+                    alt={item.product.name}
+                    src={item.product.images[0].url}
                   />
                 </div>
                 <div
@@ -74,29 +74,52 @@ const CartPage = () => {
                 >
                   <div>
                     <div className=" text-start text-xl font-semibold flex items-start justify-between">
-                      <p>{item.name}</p>
+                      <p>{item.product.name}</p>
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => removeItem(item.id)}
+                        onClick={() => removeItem(item.product.id)}
                       >
                         <XIcon className=" size-4 text-black" />
                       </Button>
                     </div>
                     <div className=" font-light text-md flex flex-col gap-y-0.5 ">
                       <p className=" font-mono tracking-wide text-pallete-red/55">
-                        {item.size.value}
+                        {item.product.size.value}
                       </p>
-                      <p className=" text-md font-bold font-mono flex items-center">
-                        <span className=" font-light text-sm mr-4">Kes</span>
-                        {item.price}
-                      </p>
+                      <div className=" flex items-center justify-between pr-2">
+                        <p className=" text-md font-bold font-mono flex items-center">
+                          <span className=" font-light text-sm mr-4">Kes</span>
+                          {item.product.price}
+                        </p>
+                        <div className=" flex items-center gap-2">
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            className="h-7 w-7"
+                            onClick={() => decrementItem(item.product.id)}
+                          >
+                            -
+                          </Button>
+                          <span className="font-mono text-sm min-w-6 text-center">{item.quantity}</span>
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            className="h-7 w-7"
+                            onClick={() => incrementItem(item.product.id)}
+                          >
+                            +
+                          </Button>
+                        </div>
+                      </div>
                     </div>
                   </div>
 
                   <div className=" relative textstart px-2 w-full flex items-center">
                     <Check className=" text-emerald-400 size-4 font-bold  mr-2" />
-                    <p className=" text-md font-semibold">In Stock</p>
+                    <p className=" text-md font-semibold">
+                      In Stock | Line total: Kes {(item.product.price * item.quantity).toLocaleString("en")}
+                    </p>
                   </div>
                 </div>
               </div>

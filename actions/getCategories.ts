@@ -4,7 +4,6 @@ import { mapApiCategory, mapApiProduct } from "@/lib/mappers";
 export const GetCategories = async () => {
   try {
     const response = await fetch(`${SERVER_API_BASE_URL}/catalog/categories`, {
-      cache: "force-cache",
       next: {
         revalidate: 120,
       },
@@ -52,7 +51,9 @@ export const GetCategories = async () => {
 
     return categoriesWithPreviewProducts;
   } catch (error) {
-    console.error("There was an errior fetching categories" + error);
+    if (process.env.NODE_ENV === "development") {
+      console.error("Error fetching categories", error);
+    }
     return [];
   }
 };

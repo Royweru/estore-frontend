@@ -21,7 +21,9 @@ export const GetProducts = async (Query: Iparams) => {
     const response = await fetch(
       `${SERVER_API_BASE_URL}/catalog/products?${searchParams.toString()}`,
       {
-        cache: "no-store",
+        next: {
+          revalidate: 60,
+        },
       }
     );
 
@@ -33,7 +35,9 @@ export const GetProducts = async (Query: Iparams) => {
     const products = (payload.items || []).map((item: any) => mapApiProduct(item));
     return products;
   } catch (error) {
-    console.log("Error fetching products" + error);
+    if (process.env.NODE_ENV === "development") {
+      console.error("Error fetching products", error);
+    }
     return [];
   }
 };

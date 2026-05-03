@@ -2,31 +2,49 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
-
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-  --font-montserrat:"Montserrat", sans-serif;
-  font-optical-sizing: auto;
-  font-weight: 400;
-  font-style: normal;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --background: #F5F1E6;
+  --foreground: #1c1b1b;
+  --primary: #7d1107;
+  --primary-container: #9E2A1C;
+  --surface-container-low: #f6f3f2;
+  --font-epilogue: "Epilogue", sans-serif;
+  --font-body: "Be Vietnam Pro", sans-serif;
 }
 
 body {
- @apply bg-background font-montserrat text-base h-full
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom scrollbar for horizontal scroll containers */
+.custom-scrollbar::-webkit-scrollbar {
+  height: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #e5e2e1;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #9E2A1C;
+  border-radius: 2px;
+}
+
+/* Material Symbols sizing */
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 }
 
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+  .font-heading {
+    font-family: var(--font-epilogue);
   }
 }

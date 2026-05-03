@@ -16,7 +16,9 @@ export const GetSizes = async () => {
     const payload = await response.json()
     return (payload || []).map((item: any) => mapApiSize(item))
   } catch (error) {
-    console.error("Error fetching sizes" + error)
+    if (process.env.NODE_ENV === "development") {
+      console.error("Error fetching sizes", error)
+    }
     return []
   }
 }

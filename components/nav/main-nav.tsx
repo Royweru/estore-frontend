@@ -1,21 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMediaQuery } from "@relume_io/relume-ui";
-import { Button } from "../ui/button";
 import type { ButtonProps } from "@relume_io/relume-ui";
 import { AnimatePresence, motion } from "framer-motion";
 import { RxChevronDown } from "react-icons/rx";
-import { Loader, ShoppingCartIcon } from "lucide-react";
+import { Loader } from "lucide-react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useSession } from "@/components/providers/session-provider";
 import { useCart } from "@/hooks/use-cart";
-
-type ImageProps = {
-  url?: string;
-  src: string;
-  alt?: string;
-};
+import { GetCategories } from "@/actions/getCategories";
+import { Category } from "@/types";
 
 type NavLink = {
   url: string;
@@ -24,7 +20,6 @@ type NavLink = {
 };
 
 type Props = {
-  logo: ImageProps;
   navLinks: NavLink[];
   buttons: ButtonProps[];
 };
@@ -32,13 +27,38 @@ type Props = {
 export type Navbar2Props = React.ComponentPropsWithoutRef<"section"> &
   Partial<Props>;
 
-export const MainNav = (props: Navbar2Props) => {
-  const { navLinks } = {
-    ...Navbar2Defaults,
-    ...props,
-  } as Props;
+export const MainNav = () => {
+  const [dynamicNavLinks, setDynamicNavLinks] = useState<NavLink[]>(
+    Navbar2Defaults.navLinks || []
+  );
+
+  useEffect(() => {
+    const fetchCats = async () => {
+      const cats = await GetCategories();
+      const updatedNavLinks = Navbar2Defaults.navLinks?.map((link) => {
+        if (link.title === "Collections") {
+          return {
+            ...link,
+            subMenuLinks: [
+              { title: "All", url: "/browse" },
+              ...cats.map((c: Category) => ({
+                title: c.name,
+                url: `/browse?categoryId=${c.id}`,
+              })),
+            ],
+          };
+        }
+        return link;
+      });
+      if (updatedNavLinks) {
+        setDynamicNavLinks(updatedNavLinks);
+      }
+    };
+    fetchCats();
+  }, []);
 
   const { items } = useCart();
+  const cartCount = items.reduce((sum, line) => sum + line.quantity, 0);
   const { user, isLoading: isAuthLoading, clearSession } = useSession();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const isMobile = useMediaQuery("(max-width: 991px)");
@@ -49,158 +69,163 @@ export const MainNav = (props: Navbar2Props) => {
     router.refresh();
     router.push("/");
   };
+
   return (
-    <nav className="sticky top-0 z-[100] flex w-full items-center border-b border-pallete-beige bg-pallete-beige/90 backdrop-blur-md lg:min-h-18 lg:px-[5%]">
-      <div className="mx-auto size-full lg:grid lg:grid-cols-[0.375fr_1fr_0.375fr] lg:items-center lg:justify-between lg:gap-4">
-        <div className="flex min-h-16 items-center justify-between px-[5%] md:min-h-18 lg:min-h-full lg:px-0">
-          <a href={"/"}>
-            <img
-              src={"/logo.png"}
-              alt={"Logo"}
-              height={75}
-              width={75}
-              className=""
-            />
-          </a>
-          <div className="flex items-center gap-4 lg:hidden">
-            <div>
-              {isAuthLoading ? (
-                <Loader className=" anima size-5 text-muted-foreground" />
-              ) : user ? (
-                <Button
-                  variant="secondary"
-                  className=" text-pallete-orange font-semibold"
-                  size={"lg"}
-                  onClick={onLogout}
-                >
-                  Sign Out
-                </Button>
-              ) : (
-                <>
-                  <Button
-                    variant="secondary"
-                    className=" text-pallete-orange font-semibold"
-                    size={"lg"}
-                    onClick={() => router.push("/sign-up")}
-                  >
-                    Sign Up
-                  </Button>
-                  <Button
-                    variant="link"
-                    className=" text-black font-semibold"
-                    size={"lg"}
-                    onClick={() => router.push("/sign-in")}
-                  >
-                    Sign In
-                  </Button>
-                </>
-              )}
-            </div>
-            <div className=" flex items-center  justify-center">
-              <ShoppingCartIcon className=" size-5 text-pallete-red" />
-            </div>
-            <button
-              className="-mr-2 flex size-12 flex-col items-center justify-center"
-              onClick={() => setIsMobileMenuOpen((prev) => !prev)}
-            >
-              <motion.span
-                className="my-[3px] h-0.5 w-6 bg-black"
-                animate={isMobileMenuOpen ? ["open", "rotatePhase"] : "closed"}
-                variants={topLineVariants}
-              />
-              <motion.span
-                className="my-[3px] h-0.5 w-6 bg-black"
-                animate={isMobileMenuOpen ? "open" : "closed"}
-                variants={middleLineVariants}
-              />
-              <motion.span
-                className="my-[3px] h-0.5 w-6 bg-black"
-                animate={isMobileMenuOpen ? ["open", "rotatePhase"] : "closed"}
-                variants={bottomLineVariants}
-              />
-            </button>
-          </div>
-        </div>
-        <motion.div
-          variants={{
-            open: {
-              height: "var(--height-open, 100dvh)",
-            },
-            close: {
-              height: "var(--height-closed, 0)",
-            },
-          }}
-          animate={isMobileMenuOpen ? "open" : "close"}
-          initial="close"
-          exit="close"
-          transition={{ duration: 0.4 }}
-          className="overflow-hidden px-[5%] text-center lg:flex lg:items-center lg:justify-center lg:px-0 lg:[--height-closed:auto] lg:[--height-open:auto]"
+    <header className="fixed top-0 w-full z-50 bg-[#F5F1E6]/95 backdrop-blur-md border-b-2 border-zinc-950 flex justify-between items-center px-4 md:px-8 lg:px-12 h-16 md:h-20">
+      {/* Left: Logo + Desktop Nav */}
+      <div className="flex items-center gap-6 lg:gap-8">
+        <Link
+          href="/"
+          className="text-xl md:text-2xl font-black tracking-tighter text-zinc-950 font-epilogue whitespace-nowrap"
         >
-          {navLinks.map((navLink, index) => (
-            <div key={index} className="first:pt-4 lg:first:pt-0">
+          URBAN HERITAGE
+        </Link>
+
+        <nav className="hidden lg:flex items-center gap-5">
+          {dynamicNavLinks.map((navLink, index) => (
+            <div key={index}>
               {navLink.subMenuLinks && navLink.subMenuLinks.length > 0 ? (
                 <SubMenu navLink={navLink} isMobile={isMobile} />
               ) : (
-                <a
+                <Link
                   href={navLink.url}
-                  className="block py-3 text-md font-bold lg:px-4 lg:py-2 lg:text-base"
+                  className={`font-epilogue font-bold uppercase tracking-widest text-xs transition-colors duration-200 ${
+                    index === 0
+                      ? "text-[#9E2A1C] border-b-2 border-[#9E2A1C] pb-1"
+                      : "text-zinc-950 hover:text-[#9E2A1C]"
+                  }`}
                 >
                   {navLink.title}
-                </a>
+                </Link>
               )}
             </div>
           ))}
-        </motion.div>
-        <div className="hidden justify-self-end lg:block gap-x-3">
-          <div className=" w-full flex items-center  justify-center gap-x-3 ">
-            {isAuthLoading ? (
-              <Loader className=" anima size-5 text-muted-foreground" />
-            ) : user ? (
-              <Button
-                variant="secondary"
-                className=" text-pallete-orange font-semibold"
-                size="lg"
-                onClick={onLogout}
-              >
-                Sign Out
-              </Button>
-            ) : (
-              <>
-                <Button
-                  variant="secondary"
-                  className=" text-pallete-orange font-semibold"
-                  size="lg"
-                  onClick={() => router.push("/sign-up")}
-                >
-                  Sign Up
-                </Button>
-                <Button
-                  variant="link"
-                  className=" text-black font-semibold"
-                  size="lg"
-                  onClick={() => router.push("/sign-in")}
-                >
-                  Sign In
-                </Button>
-              </>
-            )}
+        </nav>
+      </div>
 
-            <Button
-              variant={"ghost"}
-              size={"icon"}
-              onClick={() => router.push("/cart")}
-              className=" relative"
+      {/* Right: Icons + Auth */}
+      <div className="flex items-center gap-3">
+        {/* Auth Buttons - Desktop */}
+        <div className="hidden lg:flex items-center gap-2">
+          {isAuthLoading ? (
+            <Loader className="size-5 text-zinc-400 animate-spin" />
+          ) : user ? (
+            <button
+              onClick={onLogout}
+              className="font-epilogue font-bold uppercase tracking-widest text-xs text-zinc-950 hover:text-[#9E2A1C] transition-colors"
             >
-              <ShoppingCartIcon className=" size-5 text-text-primary" />
-              <div className=" size-5 justify-center absolute top-0 right-0 font-mono
-                 items-center flex bg-white text-pallete-orange rounded-full ">
-                {items.length}
-              </div>
-            </Button>
-          </div>
+              Sign Out
+            </button>
+          ) : (
+            <>
+              <Link
+                href="/sign-in"
+                className="font-epilogue font-bold uppercase tracking-widest text-xs text-zinc-950 hover:text-[#9E2A1C] transition-colors"
+              >
+                Sign In
+              </Link>
+            </>
+          )}
+        </div>
+
+        {/* Person Icon */}
+        <button
+          onClick={() =>
+            user ? router.push("/orders") : router.push("/sign-in")
+          }
+          className="material-symbols-outlined text-zinc-950 active:scale-95 transition-transform text-2xl"
+        >
+          person
+        </button>
+
+        {/* Cart Icon */}
+        <button
+          onClick={() => router.push("/cart")}
+          className="material-symbols-outlined text-zinc-950 active:scale-95 transition-transform relative text-2xl"
+        >
+          shopping_bag
+          {cartCount > 0 && (
+            <span className="absolute -top-1 -right-1 bg-[#9E2A1C] text-white text-[10px] font-bold rounded-full size-4 flex items-center justify-center">
+              {cartCount}
+            </span>
+          )}
+        </button>
+
+        {/* Mobile Menu Toggle */}
+        <div className="lg:hidden">
+          <button
+            className="material-symbols-outlined text-zinc-950 text-2xl"
+            onClick={() => setIsMobileMenuOpen((prev) => !prev)}
+          >
+            {isMobileMenuOpen ? "close" : "menu"}
+          </button>
         </div>
       </div>
-    </nav>
+
+      {/* Mobile Menu Dropdown */}
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2 }}
+            className="absolute top-full left-0 w-full bg-[#F5F1E6] border-b-2 border-zinc-950 px-6 py-6 lg:hidden shadow-lg"
+          >
+            <nav className="flex flex-col gap-4">
+              {dynamicNavLinks.map((navLink, index) => (
+                <div key={index}>
+                  {navLink.subMenuLinks && navLink.subMenuLinks.length > 0 ? (
+                    <SubMenu navLink={navLink} isMobile={isMobile} />
+                  ) : (
+                    <Link
+                      href={navLink.url}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="font-epilogue font-bold uppercase tracking-widest text-sm text-zinc-950 hover:text-[#9E2A1C] transition-colors block py-2"
+                    >
+                      {navLink.title}
+                    </Link>
+                  )}
+                </div>
+              ))}
+
+              <div className="border-t border-zinc-300 pt-4 mt-2">
+                {isAuthLoading ? (
+                  <Loader className="size-5 text-zinc-400 animate-spin" />
+                ) : user ? (
+                  <button
+                    onClick={() => {
+                      onLogout();
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className="font-epilogue font-bold uppercase tracking-widest text-sm text-[#9E2A1C]"
+                  >
+                    Sign Out
+                  </button>
+                ) : (
+                  <div className="flex gap-4">
+                    <Link
+                      href="/sign-up"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="font-epilogue font-bold uppercase tracking-widest text-sm text-[#9E2A1C]"
+                    >
+                      Sign Up
+                    </Link>
+                    <Link
+                      href="/sign-in"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="font-epilogue font-bold uppercase tracking-widest text-sm text-zinc-950"
+                    >
+                      Sign In
+                    </Link>
+                  </div>
+                )}
+              </div>
+            </nav>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </header>
   );
 };
 
@@ -219,10 +244,10 @@ const SubMenu = ({
       onMouseLeave={() => !isMobile && setIsDropdownOpen(false)}
     >
       <button
-        className="flex w-full items-center justify-center gap-4 py-3 text-center text-md lg:w-auto lg:flex-none lg:justify-start lg:gap-2 lg:px-4 lg:py-2 lg:text-base"
+        className="flex w-full items-center gap-2 py-2 font-epilogue font-bold uppercase tracking-widest text-xs text-zinc-950 hover:text-[#9E2A1C] transition-colors lg:text-xs"
         onClick={() => setIsDropdownOpen((prev) => !prev)}
       >
-        <span className=" font-bold">{navLink.title}</span>
+        <span>{navLink.title}</span>
         <motion.span
           animate={isDropdownOpen ? "rotated" : "initial"}
           variants={{
@@ -242,27 +267,27 @@ const SubMenu = ({
             exit="close"
             variants={{
               open: {
-                visibility: "visible",
-                opacity: "var(--opacity-open, 100%)",
+                visibility: "visible" as const,
+                opacity: 1,
                 y: 0,
               },
               close: {
-                visibility: "hidden",
-                opacity: "var(--opacity-close, 0)",
-                y: "var(--y-close, 0%)",
+                visibility: "hidden" as const,
+                opacity: 0,
+                y: -10,
               },
             }}
             transition={{ duration: 0.2 }}
-            className="bg-background-primary lg:absolute lg:z-50 lg:border lg:border-border-primary lg:p-2 lg:[--y-close:25%]"
+            className="bg-[#F5F1E6] lg:absolute lg:z-50 lg:border lg:border-zinc-300 lg:p-2 lg:mt-2 lg:rounded lg:shadow-md"
           >
             {navLink.subMenuLinks?.map((subMenuLink, index) => (
-              <a
+              <Link
                 key={index}
                 href={subMenuLink.url}
-                className="block py-3 font-bold text-center lg:px-4 lg:py-2 lg:text-left"
+                className="block py-2 px-4 font-epilogue font-semibold text-sm text-zinc-700 hover:text-[#9E2A1C] hover:bg-zinc-100 transition-colors"
               >
                 {subMenuLink.title}
-              </a>
+              </Link>
             ))}
           </motion.nav>
         </AnimatePresence>
@@ -273,73 +298,15 @@ const SubMenu = ({
 
 export const Navbar2Defaults: Navbar2Props = {
   navLinks: [
-    { title: "Home", url: "/" },
+    { title: "New Arrivals", url: "/browse?sort=newest" },
     {
-      title: "Shop by",
+      title: "Collections",
       url: "#",
       subMenuLinks: [
         { title: "All", url: "/browse" },
-        { title: "T-shirts", url: "/browse?categoryId=e8c5a9a0-f527-49b0-a2a3-839b930622ce" },
-        { title: "Hoodies", url: "/browse?categoryId=be3fbdb3-5634-4253-96c2-16c88e148c40" },
-        { title: "Toppers", url: "/browse?categoryId=9bbd3ea2-d927-454c-93f1-cda953677ca4" },
       ],
     },
-    { title: "About", url: "/about" },
-    { title: "Blog", url: "/blog" },
+    { title: "Lookbook", url: "/browse" },
+    { title: "Sale", url: "/browse?sort=price_asc" },
   ],
-  buttons: [
-    {
-      title: "Sign Up",
-      size: "sm",
-      variant: "link",
-    },
-    {
-      title: "Sign In",
-      size: "sm",
-      variant: "link",
-    },
-  ],
-};
-
-const topLineVariants = {
-  open: {
-    translateY: 8,
-    transition: { delay: 0.1 },
-  },
-  rotatePhase: {
-    rotate: -45,
-    transition: { delay: 0.2 },
-  },
-  closed: {
-    translateY: 0,
-    rotate: 0,
-    transition: { duration: 0.2 },
-  },
-};
-
-const middleLineVariants = {
-  open: {
-    width: 0,
-    transition: { duration: 0.1 },
-  },
-  closed: {
-    width: "1.5rem",
-    transition: { delay: 0.3, duration: 0.2 },
-  },
-};
-
-const bottomLineVariants = {
-  open: {
-    translateY: -8,
-    transition: { delay: 0.1 },
-  },
-  rotatePhase: {
-    rotate: 45,
-    transition: { delay: 0.2 },
-  },
-  closed: {
-    translateY: 0,
-    rotate: 0,
-    transition: { duration: 0.2 },
-  },
 };

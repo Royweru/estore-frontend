@@ -17,7 +17,7 @@ const config: Config = {
   	extend: {
   		colors: {
   			background: {
-  				DEFAULT: '#F3F2ED'
+  				DEFAULT: '#F5F1E6'
   			},
   			pallete: {
   				red: '#800000',
@@ -25,10 +25,37 @@ const config: Config = {
   				beige: '#DAD4B5',
   				cream: '#F3F2ED'
   			},
-  			foreground: 'var(--foreground)'
+  			foreground: 'var(--foreground)',
+  			'primary': '#7d1107',
+  			'primary-container': '#9E2A1C',
+  			'on-primary': '#ffffff',
+  			'on-background': '#1c1b1b',
+  			'on-surface': '#1c1b1b',
+  			'surface': '#fcf9f8',
+  			'surface-container-low': '#f6f3f2',
+  			'surface-container': '#f0edec',
+  			'surface-variant': '#e5e2e1',
+  			'outline': '#8c716c',
+  			'outline-variant': '#e0bfba',
   		},
   		fontFamily: {
-  			montserrat: 'var(--font-motserrat)'
+  			montserrat: 'var(--font-motserrat)',
+  			epilogue: ['Epilogue', 'sans-serif'],
+  			body: ['"Be Vietnam Pro"', 'sans-serif'],
+  		},
+  		fontSize: {
+  			'label-md': ['14px', { lineHeight: '1.0', fontWeight: '600' }],
+  			'body-md': ['16px', { lineHeight: '1.6', fontWeight: '400' }],
+  			'body-lg': ['18px', { lineHeight: '1.6', fontWeight: '400' }],
+  			'headline-md': ['24px', { lineHeight: '1.3', fontWeight: '700' }],
+  			'headline-lg': ['40px', { lineHeight: '1.2', letterSpacing: '-0.02em', fontWeight: '700' }],
+  			'headline-xl': ['64px', { lineHeight: '1.1', letterSpacing: '-0.04em', fontWeight: '800' }],
+  		},
+  		borderRadius: {
+  			DEFAULT: '0.125rem',
+  			lg: '0.25rem',
+  			xl: '0.5rem',
+  			full: '0.75rem',
   		},
   		keyframes: {
   			'accordion-down': {

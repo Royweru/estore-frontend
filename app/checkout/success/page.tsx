@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { AlertCircle, CheckCircle2, Loader2, XCircle } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { apiClient } from "@/lib/api";
+import { getPaymentByReference } from "@/lib/core-commerce-client";
 import { useCart } from "@/hooks/use-cart";
 import { useSession } from "@/components/providers/session-provider";
 
@@ -42,8 +42,8 @@ function CheckoutSuccessContent() {
       }
 
       try {
-        const response = await apiClient.get(`/payments/${encodeURIComponent(paymentReference)}`);
-        const status = response?.data?.status;
+        const payment = await getPaymentByReference(paymentReference);
+        const status = payment.status;
         if (status === "successful") {
           setPaymentState("successful");
           return;

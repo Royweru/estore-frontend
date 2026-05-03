@@ -2,6 +2,7 @@
 import { Button } from "@relume_io/relume-ui";
 import type { ButtonProps } from "@relume_io/relume-ui";
 import React from "react";
+import Image from "next/image";
 import { CtaButton } from "./cta-button";
 
 type ImageProps = {
@@ -71,10 +72,12 @@ const ImageGrid = ({ images }: { images: ImageProps[] }) => (
     {images.map((image, index) => (
       <div key={index} className="grid size-full grid-cols-1 gap-4">
         <div className="relative w-full pt-[120%]">
-          <img
+          <Image
             className="absolute inset-0 size-full object-cover"
             src={image.src}
-            alt={image.alt}
+            alt={image.alt || "Hero product image"}
+            fill
+            sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 20vw"
           />
         </div>
       </div>
